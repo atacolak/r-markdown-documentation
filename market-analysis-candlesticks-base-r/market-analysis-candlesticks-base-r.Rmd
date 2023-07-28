@@ -1,0 +1,239 @@
+---
+title: "market-analysis-candlesticks-base-r"
+author: "Ata COLAK"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+
+# Cryptocurrency Market Analysis
+
+# Introduction
+
+>This task sheet focuses on cryptocurrency market analysis using the dataset for BTC-USD exchange rate for 2022.
+
+> It includes the importation of the dataset, goes through the creation of a candlestick plot without libraries, calculations of consecutive increases and occurrences of increases following decreases, identification of longest increasing and decreasing trends, and discussions on the use of machine learning algorithms for investment purposes.
+
+> Each part includes code snippets and explanations for the corresponding steps.
+
+> The dataset used for this task is "btcusd_ohlc_2022.csv", which can be accessed using the link below:
+> https://github.com/gagolews/teaching-data/blob/master/marek/btcusd_ohlc_2022.csv
+
+
+## Part 1 - Importing the Dataset
+
+> In the first chunk below, the dataset has been imported, header removed (as it prevented the first value to be added), converted to matrix, and columns have been renamed as shown in the task sheet.
+
+> The head of the dataset is printed to show that it has been imported successfully.
+
+```{r 1}
+btcusd <- read.csv(paste0("https://raw.githubusercontent.com/gagolews/teaching-data/master/marek/btcusd_ohlc_2022.csv"),comment.char="#", header=FALSE)
+
+btcusd <- as.matrix(btcusd)
+colnames(btcusd) <- c("V1","V2","V3","V4")#v1234
+head(btcusd)
+```
+## Part 2 - Extraction of December Data, Creation of a Candlestick Plot
+
+> In the second part, I first extract the data for december and create a seperate dataset.
+> Afterwards, I create an empty plot as I have found working on it easier, and I suppressed plotting of both axises to create them seperately.
+> After adding a title to the plot, I have created the two axes for x and y, and their labels.
+> I have added a grid to make my plot look like the one on the task sheet.
+> Afterwards, with tremendous amounts of trial and error, I have managed to create the candlesticks which accurately show the bullish and bearish movements. It checks the open-close values to determine if the movement is bullish or bearish. If today's close is bigger than its open, the movement is bullish, and if today's close is smaller than it's open, the movement is bearish.
+> I used a for loop to print out every day seperately depending on the movements, which made my work relatively easier.
+
+```{r 2}
+december <- btcusd[1:31, ]
+par(mar = c(2, 2, 2, 5))
+plot(1:31, type = "n",ylim = range(december[,2])-200, xlab = "", ylab = "", xaxt="n", yaxt="n")
+# empty plot with 31 days, y range = december 1-31 close, xaxt-yaxt to remove normal labels
+title(main = "BTC - USD Candlestick Plot - December 2022")
+
+axis(1, at = seq(5, 30, by = 5), labels = paste("December", seq(5, 30, by = 5)))
+
+axis(4, at = seq(round(min(december[,]), digits = -2),
+                 round(max(december[,]), digits = -2), by = 300),
+labels = paste("$",
+             seq(round(min(december[,]), digits = -2),
+                 round(max(december[,]), digits = -2),by = 300)),
+                 las = 1)
+grid(nx = NULL,
+     ny = 6,
+     lty = "dotted",
+     col = "gray",
+     lwd = 0.5)
+
+
+
+
+
+#candles
+
+for(i in 1:31)
+{
+  if (december[i,4] > december[i,1]) #bullish
+  {
+      rect(i-0.2, december[i, 1], i+0.2, december[i, 4], col = "dark green", border = "dark green")
+      segments(i, december[i, 3], i, december[i, 2], lwd = 2, col = "dark green") 
+  }
+  else if (december[i,4] < december[i,1]) #bearish
+  {
+      rect(i-0.2, december[i, 1], i+0.2, december[i, 4], col = "dark red", border = "dark red")
+      segments(i, december[i, 3], i, december[i, 2], lwd = 2, col = "dark red")
+  }
+}
+```
+> We can observe all open, high, low and close values of the month December in the above candlestick plot. We can also observe the upward trends of the day, and which days BTC was bullish or bearish.
+
+## Third Part - Number of Consecutive Increases in Two Days, and Number of Days With an Increase Following a Decrease
+
+> I have calculated the results for both the whole dataset and the month of December because which data the task sheet asked me to do was not specific.
+
+> I have used a method similar to one I used in the previous task. I used nested if loops within a for loop to check if current day's close value is higher or lower than today's open value which indicates inc, and if it is, it checks again if previous day's close value is higher than previous day's opening value, and assigns the number of times this happens to either increase or decrease variables.
+
+
+```{r 3}
+twoday_inc <- 0
+twoday_inc_dec <- 0
+
+for (i in 2:nrow(btcusd))
+{
+  if (btcusd[i, 4] > btcusd[i, 1]) #if today close > today open, if today=inc
+  {
+    if (btcusd[i-1, 4] > btcusd[i-1, 1]) #if yesterday=inc
+    {
+      twoday_inc <- twoday_inc + 1
+    }
+    else
+    {
+      twoday_inc_dec <- twoday_inc_dec + 1
+    }
+  }
+}
+
+cat("In the whole dataset, increases in two consecutive days happened", twoday_inc, "times,
+whilst there were",twoday_inc_dec, "days when there was an increase followed by a decrease.")
+
+twoday_inc <- 0
+twoday_inc_dec <- 0
+
+for (i in 2:nrow(december))
+{
+  if (december[i, 4] > december[i, 1])
+  {
+    if (december[i-1, 4] > december[i-1, 1])
+    {
+      twoday_inc <- twoday_inc + 1
+    }
+    else
+    {
+      twoday_inc_dec <- twoday_inc_dec + 1
+    }
+  }
+}
+
+cat("In December, increases in two consecutive days happened", twoday_inc,"times,
+whilst there were",twoday_inc_dec,
+"days when there was an increase followed by a decrease.")
+```
+> We can observe that in the whole dataset, increases in two consecutive days happened 79 times, whilst there were 92 days when there was an increase followed by a decrease.
+
+> We can also observe that in December, increases in two consecutive days happened 2 times, whilst there were 11 days when there was an increase followed by a decrease.
+
+## Fourth Part - Longest Increasing and Decreasing Trends in Days
+
+> In fourth part, I have calculated the longest inc/dec trends in the whole dataset, and in December. Coincidentally, the number of longest inc/dec trends were both 8 in the whole dataset, and 3 in December. I have also checked the dataset to confirm that this is true, and I haven't made an error in the calculation. Honestly, I can't make this up.
+
+> I have used nested if loops similarly to the previous task, but this time I have created seperate variables for the current inc/dec trend, and if the current trend was longer than the longest trend, I would assign the longest trend with the current trend.
+
+```{r 4}
+#control flow for inc/dec trend
+
+longest_inc <- 0
+longest_dec <- 0
+current_inc <- 0
+current_dec <- 0
+
+for (i in 2:nrow(btcusd))
+{
+  if (btcusd[i, 4] > btcusd[i - 1, 4])
+  {
+    current_inc <- current_inc + 1
+    current_dec <- 0
+  }
+  else if (btcusd[i, 4] < btcusd[i - 1, 4])
+  {
+    current_dec <- current_dec + 1
+    current_inc <- 0
+  }
+  else
+  {
+    current_inc <- 0
+    current_dec <- 0
+  }
+  
+  if (current_inc > longest_inc)
+  {
+    longest_inc <- current_inc
+  }
+  
+  if (current_dec > longest_dec)
+  {
+    longest_dec <- current_dec
+  }
+}
+cat("The longest increase trend in this dataset was",longest_inc,"days,
+and the longest decrease trend was",longest_dec,"days.
+")
+
+#for dec
+longest_inc <- 0
+longest_dec <- 0
+current_inc <- 0
+current_dec <- 0
+
+for (i in 2:nrow(december))
+{
+  if (december[i, 4] > december[i - 1, 4])
+  {
+    current_inc <- current_inc + 1
+    current_dec <- 0
+  }
+  else if (december[i, 4] < december[i - 1, 4])
+  {
+    current_dec <- current_dec + 1
+    current_inc <- 0
+  }
+  else
+  {
+    current_inc <- 0
+    current_dec <- 0
+  }
+  
+  if (current_inc > longest_inc)
+  {
+    longest_inc <- current_inc
+  }
+  
+  if (current_dec > longest_dec)
+  {
+    longest_dec <- current_dec
+  }
+}
+
+cat("The longest increase trend in December was",longest_inc,"days,
+and the longest decrease trend in December was",longest_dec,"days.")
+```
+> As it can be observed, the longest increase trend in this dataset was 8 days, and coincidentally, the longest decrease trend also was 8 days.
+
+> And the longest increase trend in December was 3 days, and the longest decrease trend in December, coincidentally, again, was 3 days.
+
+## Conclusion
+
+> In conclusion, this report focused on cryptocurrency market analysis on the BTC-USD exchange rate for December 2022. For this analysis, I have imported the dataset, created a candlestick plot to visualize the daily trends, calculated the number of consecutive increases and the number of days with an increase following a decrease, determined the longest increasing and decreasing trends and answered questions related to using machine learning algorithms for investment and predicting exchange rates.
+
+> The candlestick plot provides a visual representation of the open, high, low, and close values for each day in December to allow identifying bullish and bearish movements and observe the overall trend of the BTC-USD exchange rate in December.
+
+> The analysis shows that there were 115 instances of two consecutive increases and 80 instances of an increase followed by a decrease in the whole year, and in December there were 10 instances of two consecutive increases and 7 instances of an increase followed by a decrease.
+
+> Lastly, the longest increasing and decreasing trends were found to be 8 days in the entire dataset and 3 days in December.
