@@ -1,0 +1,88 @@
+---
+title: "vector-computations2"
+author: "Ata COLAK"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+
+# Computations on Vectors
+
+
+# Introduction
+
+> In the first part, I have used various functions to combine both datasets and receive the value I need to get the min/max values. My detailed comment of the code can be seen below.
+
+
+```{r}
+x <- scan("https://github.com/gagolews/teaching-data/raw/master/marek/btcusd_close_2022.csv", skip=3)
+
+y <- as.Date(scan("https://github.com/gagolews/teaching-data/raw/master/marek/btcusd_dates_2022.csv", what=character()))
+
+
+# Retrieving min/max rate of BTC in "close" using min/max:
+btc_min <- min(x)
+btc_max <- max(x)
+
+# Retrieving the date of min/max BTC by matching the index of y with the index of min(x)/max(x).
+btc_min_date <- y[which.min(x)]
+btc_max_date <- y[which.max(x)]
+
+cat("Minimal rate of BTC was $", btc_min, "on the date ", format(btc_min_date, "%d %B %Y"))
+
+# I format the date in a more simplified way, so the response is easier to read. if I change %B to %m, it will show the month in numbers.
+# It is also possible to format the value while declaring "btc_min_date" using:
+# btc_min_date <- format(y[which.min(x)], "%d %B %Y")
+# but I choose to do it in the cat function itself.
+
+cat("Maximal rate of BTC was $", btc_max, "on the date ", format(btc_max_date, "%d %B %Y"))
+
+```
+
+
+```{r}
+hist(x, xlab = "Rates", main ="")
+```
+
+> Histograms display the frequency of the values of our dataset. By looking at this histogram, we can gain an understanding of the frequency of BTC values between the minimal and maximal rates.
+
+> We can observe that in over 100 occurences, the value of BTC was between $15000 and $20000. In around 90 occurences, the value was between $20000 and $25000, and between the values of $25000 and $35000, there were approximately 30 occurences, which compared to the values in the histogram is quite low. The frequency of occurences between values of $35000 and $45000 together is around 110, and the frequency of values between $45000 and $50000 are just under 20.
+
+> This shows that the value of BTC was between $15000 and $25000 for over six months.
+
+
+```{r}
+
+rates_jan_apr <- x[y >= "2022-01-01" & y < "2022-05-01"] # Rates of BTC between Jan - Apr
+
+rates_may_aug <- x[y >= "2022-05-01" & y < "2022-09-01"] # Rates of BTC between May - Aug
+
+rates_sep_dec <- x[y >= "2022-09-01"] # Rates of BTC between Sep - Dec
+
+cat("Trimester 1 (Jan-Apr):",
+"min=", min(rates_jan_apr),
+"mean=", mean(rates_jan_apr),
+"max=", max(rates_jan_apr),"\n")
+
+cat("Trimester 2 (May-Aug):",
+"min=", min(rates_may_aug),
+"mean=", mean(rates_may_aug),
+"max=", max(rates_may_aug),"\n")
+
+cat("Trimester 3 (Sep-Dec):",
+"min=", min(rates_sep_dec),
+"mean=", mean(rates_sep_dec),
+"max=", max(rates_sep_dec))
+
+```
+
+
+```{r}
+boxplot(list(rates_jan_apr, rates_may_aug, rates_sep_dec),
+names= c("T1","T2","T3"))
+```
+
+
+> This box plot shows us where the values of BTC stand in each 4-month period of the year. We can see that in first trimester, value of BTC was standing at just over $40000 most of the time, the value was between $45000 and just under $40000 some of the time, and fluctuated between over $45000 and just over $35000 rarely.
+
+> Same observations can be made on T2 and T3 as well. Box plots also show us that the mean value of BTC was approximately $40000 in the first trimester, $25000 in the second trimester, and just under $20000 in the last trimester. To sum it up, the box plots also show us that the highest amount of fluctuation happened in T2 and the lowest amount of fluctuation happened in T3.
