@@ -1,0 +1,94 @@
+---
+title: "regression"
+author: "Ata COLAK"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Regression
+
+# Introduction
+
+> This report shows a few examples of regression, specifically linear regression using R.
+
+> The report focuses on applying linear regression using R to analyze the relationship between education and GDP by fitting a linear model, to understand how changes in GDP might be associated with changes in education. Additionally, I visualized the relationship using a scatter plot and determine the coefficient of determination to assess the model's goodness of fit.
+
+> The dataset used for this report is "Sustainable Society Indices 2016 Dataset". The dataset can be accessed using the link below:
+
+> https://github.com/gagolews/teaching-data/blob/master/marek/ssi_2016_indicators.csv
+
+## First Part - Loading Dataset
+
+> In the first example below, the csv file is loaded and read by my device, and prints the head of the dataset to show that it has been read successfully.
+
+```{r 1}
+SSI <- read.csv(paste0("https://raw.githubusercontent.com/gagolews/",
+"teaching-data/master/marek/ssi_2016_indicators.csv"),
+comment.char="#")
+head(SSI, 3)
+```
+## Second Part - Fitting a Linear Model for Education - GDP and Explanation
+
+> In order to find the fitted model equation, we can observe the values by looking through the "coefficients" section of the list "model", where:
+
+> The (Intercept) value in coefficients indicate the estimated coefficient of the intercept, and
+
+> The GDP value in coefficients indicate the estimated coefficient of GDP.
+
+> By putting these values in y = mx = b, we receive "Education = 0.41 * GDP + 5.42", which is the estimated fitted model equation, where 5.42 indicates the estimated coefficient of intercept, and 0.41 indicates the estimated coefficient of GDP. Therefore, the full fitted model equation is:
+
+```{r 2}
+model <- lm(Education ~ GDP, data = SSI)
+
+fitted_print <- paste("Education =", coef(model)[2], "* GDP", "+", coef(model)[1])
+print(fitted_print)
+```
+
+
+## Third Part - Scatterplot With Fitted Linear Regression Line
+
+> In the third part, I have plotted GDP and education, and I have added the fitted linear regression line which is "model" as a straight line to the aforementioned scatterplot.
+
+> This scatterplot shows the correlation between GDP and education, and aims to accurately show the linear regression between the two data.
+
+```{r 3}
+plot(SSI$GDP, SSI$Education,xlab = "GDP", ylab = "Education", main = "Scatterplot of Education and GDP", lwd=1.5)
+abline(model, col = "blue")
+```
+
+
+## Fourth Part - Coefficient of Determination of Model And Interpretation
+
+> To obtain the coefficient of determination, we use the "summary()" function with "model" and ask for the "r.squared" value. Using this method, the coefficient of determination of the linear model on this dataset is:
+
+```{r 4}
+summary(model)$r.squared
+```
+
+> According to this value, we can see that the coefficient of determination is approximately 0.6, which shows that this linear model has a moderate correlation with the dataset. A value over 0.7 is accepted as a strong correlation, therefore we can observe that this model somewhat correlates with the dataset.
+
+
+## Fifth Part - Prediction of Education Scores for the Given GDP Values
+
+> To predict the education scores for GDP of 2.5, 5 and 7.5, I first created a new data frame with the GDP values.
+> Afterwards, I used the predict function to predict the education scores.
+> And lastly, I displayed the predicted scores of education.
+> I have created a second dataset to display the prediction scores so the result is more presentable.
+
+```{r 5}
+GDP_dataframe <- data.frame(GDP = c(2.5, 5, 7.5))
+predictedScores <- predict(model, GDP_dataframe)
+predicted_scores_print <- data.frame(GDP_dataframe, predictedScores) 
+predicted_scores_print
+```
+
+# Conclusion
+
+> In conclusion, this report focused on applying linear regression using R to analyze the relationship between education and GDP. A scatter plot was created to visualize the relationship, and the coefficient of determination was approximately 0.6, indicating a moderate correlation between education and GDP in the dataset.
+
+> While doing this report, I have learned how to create a fitted linear regression line, add a fitted linear regression line on a model, computing the coefficient of determination, and using the predict function.
+
+> What was interesting to me about this report was how simple it was to predict the approximate information without having the related information in the dataset using linear models, and a thought provoking question was how inaccurate could the predictions be if the values asked in a dataset were with very high numbers, and what a plot of the correlation between the size of values - coefficient of determination would look like.
+
