@@ -1,0 +1,109 @@
+---
+title: "matrix-computations"
+author: "Ata COLAK"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+# Computations on Matrices
+
+# Introduction
+
+> This task shows a few examples of matrix computations using R. The task shows examples of graph plots, selecting custom rows and columns in a matrix, creating custom functions, exporting certain dates of the year to analyse, and creating custom tables.
+
+> The dataset used is EUR currency rates until 2023-02-02, and can be accessed via the link below:
+
+> https://raw.githubusercontent.com/gagolews/teaching-data/",
+"master/marek/eurxxx-20230202-numeric.csv
+
+## First Part - EUR-PLN Plot
+
+> Code is explained via the comments.
+
+```{r 1}
+X <- as.matrix(read.csv(
+paste0("https://raw.githubusercontent.com/gagolews/teaching-data/",
+"master/marek/eurxxx-20230202-numeric.csv"), comment="#"))
+head(X, 3)
+
+
+# Plot of EUR-PLN for the year 2022,
+# Values of "xlim" are columns where "Date" corresponds to year 2022.
+# "ylim" has been increased to show the plot close-up.
+plot(X[,1],X[,14] , xlim = c(18993, 19357), ylim = c(4.5, 4.95), type = "l", lwd = 1.5, ylab = "EUR-to-PLN", xlab = "Days in Unix Date")
+```
+
+## Second Part - Min, Median, Mean, Max Table
+
+> Code is explained via the comments.
+
+```{r 2}
+# Custom function 
+min_median_mean_max <- function(x) 
+{
+    c(min=min(x), median=median(x), mean=mean(x), max=max(x))
+}
+
+
+# Transpose to show the matrix the way it is in the task sheet,
+# Only includes rows with "Date" less than 19357 and more than or equal to 18993,
+# Using custom function min_median_mean_max,
+# Columns 2 to 42 to include every currency, but not the date column.
+
+t(apply(t(X[X[,"Date"]<19357 & X[,"Date"]>=18993,2:42]), 1, min_median_mean_max))
+```
+
+## Third Task - AUD-PLN Plot 
+
+> Code is explained via the comments.
+
+```{r 3}
+
+# EUR-PLN divided by EUR-AUD gives AUD-PLN rates.
+
+aud2pln <-  X[,14] / X[,27]
+
+# Plot of equation:
+
+plot(X[,1], aud2pln, xlab = "Days", ylab = "AUD-to-PLN", type = "l", lwd = 1.5)
+
+```
+
+## Fourth Task - Average AUD-PLN Rates for 2020, 2021, 2022
+
+> Code is explained via the comments.
+
+```{r 4}
+# Matrix seperated in dates 2020, 2021 and 2022.
+
+date_2020 <- X[X[,"Date"]<=18627 & X[,"Date"]>=18262,]
+date_2021 <- X[X[,"Date"]<= 18992 & X[,"Date"] >=18628,]
+date_2022 <- X[X[,"Date"]<=19357 & X[,"Date"]>=18993,]
+
+# AUD-PLN rates in each year.
+
+aud2pln2020 <- date_2020[,14] / date_2020[,27]
+aud2pln2021 <- date_2021[,14] / date_2021[,27]
+aud2pln2022 <- date_2022[,14] / date_2022[,27]
+
+
+# Custom table with values above.
+exchange_table <- matrix(c(2020, mean(aud2pln2020), 2021, mean(aud2pln2021), 2022, mean(aud2pln2022)), nrow = 3, byrow = TRUE)
+colnames(exchange_table) <- c("Year", "AverageRate")
+
+exchange_table
+
+```
+
+# Conclusion
+
+> In conclusion, this task demonstrated the use of matrices in R for analysing financial data, and various methods to access certain information in matrices.
+
+> While doing this task, I have learned how to select certain rows and columns from matrices and analyse the data I have received by putting it through certain conditions.
+
+> I have observed that during 2020-2021-2022, the AUD-PLN rates have increased in value every year.
+
+> What was interesting to me was the peak in EUR-PLN values around Unix date 19050. The value has increased over 5 and immediately went down again.
