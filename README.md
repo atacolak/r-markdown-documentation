@@ -1,4 +1,4 @@
-# Disclaimer: Materials, such as datasets, structure and parts shown in this documentation belong to Deakin University, and I am not allowed to publish such materials publicly online. This repository is created solely for employers to gain information regarding my knowledge in R programming language.
+# Disclaimer: Materials, such as datasets, structure and parts shown in this documentation belong to Deakin University, and I am not allowed to publish such materials publicly online. This repository is created solely for employers to gain information regarding my knowledge in R programming language. All responsibility regarding keeping this documentation private belongs to the viewer.
 
 # Applications of Classification, Clustering, Data Wrangling and Computations Using R Markdown
 
